@@ -1,0 +1,111 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bookhaven_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: bookhaven_db
+      POSTGRES_USER: bookhaven_user
+      POSTGRES_PASSWORD: bookhaven_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookhaven_user -d bookhaven_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: bookhaven_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flask:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.flask
+    container_name: bookhaven_flask
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://bookhaven_user:bookhaven_pass@postgres:5432/bookhaven_db
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET_KEY=change-me-in-production
+      - UPLOAD_FOLDER=/app/uploads
+    volumes:
+      - ./backend:/app
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  fastapi:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.fastapi
+    container_name: bookhaven_fastapi
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://bookhaven_user:bookhaven_pass@postgres:5432/bookhaven_db
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.flask
+    container_name: bookhaven_celery
+    restart: unless-stopped
+    command: celery -A celery_app worker --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://bookhaven_user:bookhaven_pass@postgres:5432/bookhaven_db
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - postgres
+
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.flask
+    container_name: bookhaven_beat
+    restart: unless-stopped
+    command: celery -A celery_app beat --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://bookhaven_user:bookhaven_pass@postgres:5432/bookhaven_db
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:

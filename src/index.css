@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 30 40% 15%;
+    --card: 45 100% 98%;
+    --card-foreground: 30 40% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 40% 15%;
+    --primary: 30 100% 65%;
+    --primary-foreground: 30 40% 15%;
+    --secondary: 45 100% 90%;
+    --secondary-foreground: 30 40% 15%;
+    --muted: 45 50% 95%;
+    --muted-foreground: 30 20% 40%;
+    --accent: 25 95% 75%;
+    --accent-foreground: 30 40% 15%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 30% 85%;
+    --input: 30 30% 85%;
+    --ring: 30 100% 65%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Lora', serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 bg-clip-text text-transparent;
+  }
+  .hero-gradient {
+    background: linear-gradient(135deg, #fff5e6 0%, #ffe4b3 50%, #ffd699 100%);
+  }
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-sm border border-orange-200/50 shadow-lg;
+  }
+  .smooth-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  .animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
+  }
+  .classic-shadow {
+    box-shadow: 0 4px 6px -1px rgba(251,146,60,0.1), 0 2px 4px -1px rgba(251,146,60,0.06);
+  }
+  .classic-shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(251,146,60,0.15), 0 4px 6px -2px rgba(251,146,60,0.1);
+  }
+  .classic-border { @apply border-2 border-orange-300; }
+  .page-container {
+    @apply min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50;
+  }
+
+  /* ── Page fade-in ── */
+  .page-enter {
+    animation: fadeInPage 0.4s ease-out both;
+  }
+
+  /* ── Hero slide-in helpers ── */
+  .hero-fade-up {
+    animation: fadeUp 0.7s ease-out both;
+  }
+  .hero-fade-up-delay-1 {
+    animation: fadeUp 0.7s ease-out 0.15s both;
+  }
+  .hero-fade-up-delay-2 {
+    animation: fadeUp 0.7s ease-out 0.3s both;
+  }
+  .hero-fade-up-delay-3 {
+    animation: fadeUp 0.7s ease-out 0.45s both;
+  }
+}
+
+/* ── Keyframes ── */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes fadeInPage {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #fff5e6; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #fb923c, #f59e0b);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #f97316, #d97706);
+}
+* { scrollbar-width: thin; scrollbar-color: #fb923c #fff5e6; }
+
+/* ── Mobile — prevent horizontal overflow ── */
+html, body { overflow-x: hidden; max-width: 100vw; }
+
+@media (max-width: 640px) {
+  .container { padding-left: 1rem; padding-right: 1rem; }
+}
